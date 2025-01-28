@@ -1,0 +1,10 @@
+# JetBrains IDE
+.idea/
+
+# Visual Studio Code
+.vscode/
+
+.env
+/client/node_modules/
+/client/node_modules/dist
+/server/node_modules/

@@ -1,0 +1,75 @@
+services:
+
+  mysql:
+    image: mysql:9.2
+    restart: unless-stopped
+    container_name: mysqldb
+    environment:
+      - MYSQL_ALLOW_EMPTY_PASSWORD=1
+      - MYSQL_DATABASE=$MYSQLDB_DATABASE
+    expose:
+      - $MYSQLDB_LOCAL_PORT
+    ports:
+      - $MYSQLDB_LOCAL_PORT:$MYSQLDB_DOCKER_PORT
+    volumes:
+      - /var/lib/mysql
+    networks:
+      - back
+    healthcheck:
+      test: ["CMD", "mysql", "-u", "$MYSQLDB_USER", "-p", "--execute", "SHOW DATABASES;"]
+      interval: 3s
+      retries: 5
+      timeout: 5s
+
+  server:
+    depends_on:
+      mysql:
+        condition: service_healthy
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    restart: always
+    env_file: ./.env
+    container_name: server
+    links:
+      - mysql:mysql
+    hostname: server
+    ports:
+      - $NODE_LOCAL_PORT:$NODE_DOCKER_PORT
+    environment:
+      - DB_HOST=mysqldb
+      - DB_USER=$MYSQLDB_USER
+      - DB_PASSWORD=$MYSQLDB_PASSWORD
+      - DB_NAME=$MYSQLDB_DATABASE
+      - DB_PORT=$MYSQLDB_DOCKER_PORT
+      - CLIENT_ORIGIN=$CLIENT_ORIGIN
+    networks:
+      - back
+      - ui
+
+  client:
+    depends_on:
+      - server
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+      args:
+        - REACT_APP_API_BASE_URL=$CLIENT_API_BASE_URL
+    container_name: client
+    restart: always
+    ports:
+      - $REACT_LOCAL_PORT:$REACT_DOCKER_PORT
+    volumes:
+      - ./client/.env:/app/.env
+      - ./client/public:/app/public
+      - ./client/src:/app/src
+    links:
+      - server:server
+    hostname: client
+
+volumes:
+  dbdata:
+
+networks:
+  back:
+  ui:
