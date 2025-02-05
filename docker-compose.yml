@@ -6,11 +6,11 @@ services:
     container_name: mysqldb
     environment:
       - MYSQL_ALLOW_EMPTY_PASSWORD=1
-      - MYSQL_DATABASE=$MYSQLDB_DATABASE
+      - MYSQL_DATABASE=user_manager_db
     expose:
-      - $MYSQLDB_LOCAL_PORT
+      - 3306
     ports:
-      - $MYSQLDB_LOCAL_PORT:$MYSQLDB_DOCKER_PORT
+      - 3306:3306
     volumes:
       - dbdata:/var/lib/mysql
       - ./scripts:/docker-entrypoint-initdb.d
@@ -36,14 +36,13 @@ services:
       - mysql:mysql
     hostname: server
     ports:
-      - $NODE_LOCAL_PORT:$NODE_DOCKER_PORT
+      - 6868:8080
     environment:
       - DB_HOST=mysqldb
-      - DB_USER=$MYSQLDB_USER
-      - DB_PASSWORD=$MYSQLDB_PASSWORD
-      - DB_NAME=$MYSQLDB_DATABASE
-      - DB_PORT=$MYSQLDB_DOCKER_PORT
-      - CLIENT_ORIGIN=$CLIENT_ORIGIN
+      - DB_USER=root
+      - DB_PASSWORD=null
+      - DB_NAME=user_manager_db
+      - DB_PORT=3306
     networks:
       - app_network
 
@@ -53,12 +52,10 @@ services:
     build:
       context: ./client
       dockerfile: Dockerfile
-      args:
-        - REACT_APP_API_BASE_URL=$CLIENT_API_BASE_URL
     container_name: client
     restart: always
     ports:
-      - $REACT_LOCAL_PORT:$REACT_DOCKER_PORT
+      - 3000:3000
     volumes:
       - ./client/.env:/app/.env
       - ./client/public:/app/public
