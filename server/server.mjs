@@ -1,9 +1,9 @@
-import dotenv from "dotenv";
+import { config } from 'dotenv';
 import express from "express";
 import cors from "cors";
 import userRoutes from "./routes/user.routes.mjs";
 
-dotenv.config();
+config();
 
 const app = express();
 
@@ -22,15 +22,21 @@ app.use("/api/", userRoutes);
 
 userRoutes(app);
 
-const startServer = () => {
-    try {
-        app.listen(process.env.NODE_DOCKER_PORT || 8080, () => {
-            console.log(`App is running on port ${process.env.NODE_DOCKER_PORT || 8080}...`);
-        });
-    } catch (e) {
-        console.error('Server Error:', e.message);
-        process.exit(1);
-    }
-};
+try {
+    app.listen(process.env.NODE_DOCKER_PORT || 8080, () => {
+        console.log(`App is running on port ${process.env.NODE_DOCKER_PORT || 8080}...`);
+    });
+} catch (e) {
+    console.error('Server Error: ', e.message);
+    process.exit(1);
+}
 
-startServer();
+const shutdown = async () => {
+    console.log('Closing sequelize connections');
+    await db.sequelize.close();
+    console.log('Exit');
+    process.exit(0);
+}
+
+process.on('SIGINT', shutdown);
+process.on('SIGTERM', shutdown);

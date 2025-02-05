@@ -3,10 +3,10 @@ import {
 	Route,
 	BrowserRouter as Router
 } from 'react-router-dom'
-import LoginPage from './pages/Login';
-import SignUpPage from './pages/SignUp';
-import HomePage from './pages/Home';
-import NotFoundPage from './pages/NotFound';
+import LoginPage from './pages/Login/Login';
+import SignUpPage from './pages/SignUp/SignUp';
+import HomePage from './pages/Home/Home';
+import NotFoundPage from './pages/NotFound/NotFound';
 // import Header from "./components/Header/Header";
 
 const App = () => {

@@ -1,25 +1,36 @@
+import { DataTypes } from '@sequelize/core';
+
 export default (sequelize, Sequelize) => {
     const User = sequelize.define("user", {
         name: {
-            type: Sequelize.STRING,
+            type: DataTypes.STRING,
             allowNull: false
         },
         email: {
-            type: Sequelize.STRING,
+            type: DataTypes.STRING,
             unique: true,
             allowNull: false
         },
         lastLoginTime: {
-            type: Sequelize.DATE
+            type: DataTypes.DATE
         },
         status: {
-            type: Sequelize.ENUM('active', 'blocked'),
+            type: DataTypes.ENUM('active', 'blocked'),
             defaultValue: 'active'
         },
         registrationTime: {
-            type: Sequelize.DATE,
+            type: DataTypes.DATE,
             defaultValue: Sequelize.NOW
         }
+    }, {
+        sequelize,
+        modelName: 'user',
+        indexes: [
+            {
+                unique: true,
+                fields: ['email', 'name', 'lastLoginTime', 'status']
+            }
+        ]
     });
 
     User.beforeFind((options) => {
@@ -32,7 +43,7 @@ export default (sequelize, Sequelize) => {
     sequelize.sync().then(() => {
         console.log('User table created successfully!');
     }).catch((error) => {
-        console.error('Unable to create table : ', error);
+        console.error('Unable to create table: ', error);
     });
 
     return User;

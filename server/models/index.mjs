@@ -1,18 +1,18 @@
-import { Sequelize } from "sequelize";
-import { dbConfig } from "../config/db.config.mjs";
 import user from "./user.model.mjs";
+import { Sequelize } from '@sequelize/core';
+import { MySqlDialect } from '@sequelize/mysql';
+import { config } from 'dotenv';
 
-const sequelize = new Sequelize(
-    dbConfig.DB,
-    dbConfig.USER,
-    // dbConfig.PASSWORD,
-    '',
-    {
-        host: dbConfig.HOST,
-        // dialect: "mysql",
-        dialect: dbConfig.dialect,
-        // port: dbConfig.port
-    });
+config();
+
+const sequelize = new Sequelize({
+    dialect: MySqlDialect,
+    database: 'user_manager_db',
+    user: 'root',
+    password: '',
+    host: 'mysql',
+    port: 3306,
+});
 
 try {
     await sequelize.authenticate();

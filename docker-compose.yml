@@ -2,7 +2,7 @@ services:
 
   mysql:
     image: mysql:9.2
-    restart: unless-stopped
+    restart: always
     container_name: mysqldb
     environment:
       - MYSQL_ALLOW_EMPTY_PASSWORD=1
@@ -12,12 +12,13 @@ services:
     ports:
       - $MYSQLDB_LOCAL_PORT:$MYSQLDB_DOCKER_PORT
     volumes:
-      - /var/lib/mysql
+      - dbdata:/var/lib/mysql
+      - ./scripts:/docker-entrypoint-initdb.d
     networks:
-      - back
+      - app_network
     healthcheck:
-      test: ["CMD", "mysql", "-u", "$MYSQLDB_USER", "-p", "--execute", "SHOW DATABASES;"]
-      interval: 3s
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
       retries: 5
       timeout: 5s
 
@@ -44,8 +45,7 @@ services:
       - DB_PORT=$MYSQLDB_DOCKER_PORT
       - CLIENT_ORIGIN=$CLIENT_ORIGIN
     networks:
-      - back
-      - ui
+      - app_network
 
   client:
     depends_on:
@@ -71,5 +71,5 @@ volumes:
   dbdata:
 
 networks:
-  back:
-  ui:
+  app_network:
+    driver: bridge
